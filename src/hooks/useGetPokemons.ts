@@ -50,7 +50,7 @@ export const GET_POKEMONS = gql`
 `;
 
 export const GET_POKEMON_DETAILS = gql`
-  query GetPokemonDetails($id: String!) {
+  query GetPokemonDetails($id: Int!) {
     pokemon(where: { id: { _eq: $id } }) {
       id
       pokemonspecy {
@@ -108,13 +108,17 @@ export const useGetPokemons = (): {
   };
 };
 
-export const useGetPokemonDetails = (id: string) => {
+export const useGetPokemonDetails = (id: number) => {
   const { data, loading, error } = useQuery<{ pokemon: any[] }>(GET_POKEMON_DETAILS, {
     variables: { id },
-    skip: !id, // prevents query from running if id is empty
+    skip: !id,
   });
 
   const pokemonData = data?.pokemon?.[0];
+
+  if (!pokemonData && !loading) {
+    console.warn(`No Pokémon found for id ${id}`);
+  }
 
   const detail: PokemonDetail | undefined = pokemonData
     ? {
