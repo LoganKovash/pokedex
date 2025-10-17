@@ -24,6 +24,8 @@ const AppRoutes = () => {
           <Route index element={<HomePage />} />
           <Route path="list" element={<PokemonListPage />} />
         </Route>
+
+        <Route path="/list/pokemon/:id" element={<PokemonDetailModal />} />
       </Routes>
 
       {/* Modal overlay route */}

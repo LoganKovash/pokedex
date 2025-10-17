@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetPokemonDetails } from 'src/hooks/useGetPokemons';
 import { tss } from '../../tss';
 
@@ -7,6 +7,7 @@ export const PokemonDetailModal = () => {
   const { id } = useParams<{ id: string }>();
   const numericId = Number(id);
   const navigate = useNavigate();
+  const location = useLocation();
   const { data, loading, error } = useGetPokemonDetails(numericId);
   const { classes } = useStyles();
 
@@ -14,7 +15,13 @@ export const PokemonDetailModal = () => {
   if (error || !data) return <div>Error loading details.</div>;
   if (!id) return <div>Invalid Pokémon ID</div>;
 
-  const handleClose = () => navigate(-1);
+  const handleClose = () => {
+    if (location.state?.background) {
+      navigate(-1); // overlay case
+    } else {
+      navigate('/list'); // direct link case
+    }
+  };
 
   return (
     <div className={classes.overlay} role="dialog" aria-modal="true">
@@ -120,6 +127,9 @@ const useStyles = tss.create(({ theme }) => ({
     gridTemplateColumns: '1fr 1fr',
     gap: theme.spacing(1),
     marginTop: theme.spacing(2),
+    background: '#1d3550',
+    padding: '1em',
+    borderRadius: '10px',
   },
   statItem: {
     fontSize: '0.9rem',

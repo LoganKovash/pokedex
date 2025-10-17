@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { tss } from '../tss';
 import { useGetPokemons } from 'src/hooks/useGetPokemons';
 
@@ -7,12 +7,8 @@ export const PokemonListPage = () => {
   const { classes, theme } = useStyles();
   const { data, loading, error } = useGetPokemons();
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
-
-  const goToPokemon = (id: string) => {
-    navigate(`/list/pokemon/${id}`, { state: { background: location } });
-  };
 
   const skeletons = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -52,10 +48,10 @@ export const PokemonListPage = () => {
         <ul className={classes.list}>
           {filteredData.map((pokemon) => (
             <li key={pokemon.id} className={classes.cardWrapper}>
-              <button
-                type="button"
+              <Link
+                to={`/list/pokemon/${pokemon.id}`}
+                state={{ background: location }}
                 className={classes.card}
-                onClick={() => goToPokemon(pokemon.id)}
               >
                 <img src={pokemon.sprite} alt={pokemon.name} className={classes.image} />
                 <div className={classes.info}>
@@ -79,7 +75,7 @@ export const PokemonListPage = () => {
                     </div>
                   )}
                 </div>
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
