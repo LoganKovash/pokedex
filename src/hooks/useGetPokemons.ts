@@ -9,7 +9,13 @@ export interface Pokemon {
 }
 
 export interface PokemonDetail extends Pokemon {
-  // Details
+  height?: number;
+  weight?: number;
+  capture_rate?: number;
+  stats?: {
+    name: string;
+    base_stat: number;
+  }[];
 }
 
 export const GET_POKEMONS = gql`
@@ -76,14 +82,14 @@ export const GET_POKEMON_DETAILS = gql`
 `;
 
 // Search should be done client-side for the mid-level assessment. Uncomment for the senior assessment.
-export const useGetPokemons = (/* search?: string */): {
+export const useGetPokemons = (): {
   data: Pokemon[];
   loading: boolean;
   error: useQuery.Result['error'];
 } => {
   const { data, loading, error } = useQuery<{ pokemon: any[] }>(GET_POKEMONS, {
     variables: {
-      search: '', // `.*${search}.*`,
+      search: '',
     },
   });
 
@@ -93,9 +99,39 @@ export const useGetPokemons = (/* search?: string */): {
         (p): Pokemon => ({
           id: p.id,
           name: p.pokemonspecy.pokemonspeciesnames?.[0]?.name,
+          types: p.pokemontypes?.map((t: any) => t.type?.typenames?.[0]?.name) ?? [],
+          sprite: p.pokemonsprites?.[0]?.sprites ?? undefined,
         }),
       ) ?? [],
     loading,
     error,
   };
+};
+
+export const useGetPokemonDetails = (id: string) => {
+  const { data, loading, error } = useQuery<{ pokemon: any[] }>(GET_POKEMON_DETAILS, {
+    variables: { id },
+    skip: !id, // prevents query from running if id is empty
+  });
+
+  const pokemonData = data?.pokemon?.[0];
+
+  const detail: PokemonDetail | undefined = pokemonData
+    ? {
+        id: pokemonData.id,
+        name: pokemonData.pokemonspecy?.pokemonspeciesnames?.[0]?.name,
+        sprite: pokemonData.pokemonsprites?.[0]?.sprites,
+        types: pokemonData.pokemontypes?.map((t: any) => t.type?.typenames?.[0]?.name) ?? [],
+        height: pokemonData.height,
+        weight: pokemonData.weight,
+        capture_rate: pokemonData.pokemonspecy?.capture_rate,
+        stats:
+          pokemonData.pokemonstats?.map((s: any) => ({
+            name: s.stat.name,
+            base_stat: s.base_stat,
+          })) ?? [],
+      }
+    : undefined;
+
+  return { data: detail, loading, error };
 };
