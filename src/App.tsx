@@ -18,17 +18,15 @@ const AppRoutes = () => {
 
   return (
     <>
-      {/* Main routes render either background or current location */}
       <Routes location={state?.background || location}>
         <Route path="/" element={<LayoutWrapper />}>
           <Route index element={<HomePage />} />
-          <Route path="list" element={<PokemonListPage />} />
+          <Route path="list" element={<PokemonListPage />}>
+            <Route path="pokemon/:id" element={<PokemonDetailModal />} />
+          </Route>
         </Route>
-
-        <Route path="/list/pokemon/:id" element={<PokemonDetailModal />} />
       </Routes>
 
-      {/* Modal overlay route */}
       {state?.background && (
         <Routes>
           <Route path="/list/pokemon/:id" element={<PokemonDetailModal />} />
