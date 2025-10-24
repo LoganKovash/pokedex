@@ -1,7 +1,7 @@
 import React from 'react';
-import { act, userEventRender, render } from 'src/test-utils';
+import { act, userEventRender, renderApp } from 'src/test-utils';
 import { PokemonListPage } from './PokemonListPage';
-import { useNavigate } from 'react-router-dom';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 jest.mock('src/hooks/useGetPokemons', () => ({
   useGetPokemons: jest.fn().mockReturnValue({
@@ -13,30 +13,29 @@ jest.mock('src/hooks/useGetPokemons', () => ({
   }),
 }));
 
+const mockNavigate = jest.fn();
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: jest.fn(),
 }));
 
 describe('PokemonListPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+  });
+
   test('it renders', () => {
     const { getByText } = userEventRender(<PokemonListPage />);
-    getByText('#1 Bulbasaur');
+    expect(getByText('#1 Bulbasaur')).toBeInTheDocument();
   });
+
   test('clicking on a pokemon calls navigate', async () => {
-    const mockNavigate = jest.fn();
-    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    const { getByText } = userEventRender(<PokemonListPage />);
 
-    const { getByText, user } = render(<PokemonListPage />);
-
-    await act(async () => {
-      await user.click(getByText('#1 Bulbasaur'));
-    });
-
-    expect(mockNavigate).toHaveBeenCalledWith(
-      expect.stringContaining('/list/pokemon/1'),
-      expect.any(Object),
-    );
+    const bulbasaurLink = getByText('#1 Bulbasaur').closest('a');
+    expect(bulbasaurLink).toHaveAttribute('href', '/list/pokemon/1');
   });
   test('typing in the search bar filters the results', async () => {
     const { getByPlaceholderText, queryByText, user } = userEventRender(<PokemonListPage />);
